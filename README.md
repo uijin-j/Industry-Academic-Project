@@ -16,8 +16,8 @@ Jun, 2023 ~ Dec, 2023
 * Language : JAVA
 
 ## 라이브러리
-- [Mediapipe](https://developers.google.com/mediapipe) <br>
+- [Mediapipe](https://developers.google.com/mediapipe)
 구글에서 개발한 크로스 플랫폼 프레임워크로 카메라로 환자를 모니터링한 뒤 환자의 신체부위 랜드마크를 감지하는 기능(Pose Landmark)에 활용합니다.
 
-- [OpenCV](https://opencv.org/) <br>
+- [OpenCV](https://opencv.org/)
 실시간 컴퓨터 비전을 목적으로 한 프로그래밍 라이브러리로 카메라 프레임에서 침대를 감지하는 기능(object detection)에 활용합니다.
