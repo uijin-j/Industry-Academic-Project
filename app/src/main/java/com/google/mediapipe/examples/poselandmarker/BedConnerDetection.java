@@ -1,4 +1,4 @@
-package com.google.mediapipe.examples.poselandmarker.util;
+package com.google.mediapipe.examples.poselandmarker;
 
 
 import android.graphics.Canvas;
@@ -166,7 +166,8 @@ public class BedConnerDetection {
             double[] vec = left_lines.get(i, 0);
             double x1 = vec[0], y1 = vec[1], x2 = vec[2], y2 = vec[3];
             double m = (y2 - y1) / (x2 - x1);
-            if (tan_neg_lower_margin < m && m < tan_neg_upper_margin || tan_pos_lower_margin < m && m < tan_pos_upper_margin) {
+
+            if (tan_neg_lower_margin < m && m < tan_neg_upper_margin) {
 
                 double distanceN = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
                 if (maxL < distanceN) {
@@ -188,7 +189,7 @@ public class BedConnerDetection {
             double x1 = vec[0] + width/2, y1 = vec[1], x2 = vec[2] + width/2, y2 = vec[3];
             double m = (y2 - y1) / (x2 - x1);
 
-            if (tan_neg_lower_margin < m && m < tan_neg_upper_margin || tan_pos_lower_margin < m && m < tan_pos_upper_margin) {
+            if (tan_pos_lower_margin < m && m < tan_pos_upper_margin) {
 
                 double distanceN = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
                 if (maxL < distanceN) {
