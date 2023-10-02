@@ -16,6 +16,7 @@
 package com.google.mediapipe.examples.poselandmarker
 
 import androidx.lifecycle.ViewModel
+import com.google.mediapipe.examples.poselandmarker.util.PoseLandmarkerHelper
 
 /**
  *  This ViewModel is used to store pose landmarker helper settings
