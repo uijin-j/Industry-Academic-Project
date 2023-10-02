@@ -1,4 +1,4 @@
-package com.google.mediapipe.examples.poselandmarker;
+package com.google.mediapipe.examples.poselandmarker.util;
 
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark;
 
