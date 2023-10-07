@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.mediapipe.examples.poselandmarker
+package com.google.mediapipe.examples.poselandmarker.util
 
 import android.content.Context
 import android.graphics.Canvas
@@ -22,6 +22,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
+import com.google.mediapipe.examples.poselandmarker.R
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
@@ -127,57 +128,58 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
                     canvas.drawLine(
                         (bedConnerDetection.normalizedLx1 * imageWidth * scaleFactor),
-                        (bedConnerDetection.normalizedLy1 * imageWidth * scaleFactor),
+                        (bedConnerDetection.normalizedLy1 * imageHeight * scaleFactor),
                         (bedConnerDetection.normalizedLx2 * imageWidth * scaleFactor),
-                        (bedConnerDetection.normalizedLy2 * imageWidth * scaleFactor),
+                        (bedConnerDetection.normalizedLy2 * imageHeight * scaleFactor),
                         linePaint2)
 
                     canvas.drawLine(
                         (bedConnerDetection.normalizedRx1 * imageWidth * scaleFactor),
-                        (bedConnerDetection.normalizedRy1 * imageWidth * scaleFactor),
+                        (bedConnerDetection.normalizedRy1 * imageHeight * scaleFactor),
                         (bedConnerDetection.normalizedRx2 * imageWidth * scaleFactor),
-                        (bedConnerDetection.normalizedRy2 * imageWidth * scaleFactor),
+                        (bedConnerDetection.normalizedRy2 * imageHeight * scaleFactor),
                         linePaint2)
 
                     canvas.drawLine(
                         (bedConnerDetection.dangerLx1 * imageWidth * scaleFactor),
-                        (bedConnerDetection.dangerLy1 * imageWidth * scaleFactor),
+                        (bedConnerDetection.dangerLy1 * imageHeight * scaleFactor),
                         (bedConnerDetection.dangerLx2 * imageWidth * scaleFactor),
-                        (bedConnerDetection.dangerLy2 * imageWidth * scaleFactor),
+                        (bedConnerDetection.dangerLy2 * imageHeight * scaleFactor),
                         linePaint2)
 
                     canvas.drawLine(
                         (bedConnerDetection.dangerRx1 * imageWidth * scaleFactor),
-                        (bedConnerDetection.dangerRy1 * imageWidth * scaleFactor),
+                        (bedConnerDetection.dangerRy1 * imageHeight * scaleFactor),
                         (bedConnerDetection.dangerRx2 * imageWidth * scaleFactor),
-                        (bedConnerDetection.dangerRy2 * imageWidth * scaleFactor),
+                        (bedConnerDetection.dangerRy2 * imageHeight * scaleFactor),
                         linePaint2)
+
                 }
 
                 var center = centerOfGravity.getTotalCOG(landmark)
 
                 leftBedLim = get_Limit(bedConnerDetection.normalizedLx1 * imageWidth * scaleFactor,
                     bedConnerDetection.normalizedLx2 * imageWidth * scaleFactor,
-                    bedConnerDetection.normalizedLy1 * imageWidth * scaleFactor,
-                    bedConnerDetection.normalizedLy2 * imageWidth * scaleFactor,
+                    bedConnerDetection.normalizedLy1 * imageHeight * scaleFactor,
+                    bedConnerDetection.normalizedLy2 * imageHeight * scaleFactor,
                     center.y() * imageHeight * scaleFactor)
 
                 rightBedLim = get_Limit(bedConnerDetection.normalizedRx1 * imageWidth * scaleFactor,
                     bedConnerDetection.normalizedRx2 * imageWidth * scaleFactor,
-                    bedConnerDetection.normalizedRy1 * imageWidth * scaleFactor,
-                    bedConnerDetection.normalizedRy2 * imageWidth * scaleFactor,
+                    bedConnerDetection.normalizedRy1 * imageHeight * scaleFactor,
+                    bedConnerDetection.normalizedRy2 * imageHeight * scaleFactor,
                     center.y() * imageHeight * scaleFactor)
 
                 leftDangerLim = get_Limit(bedConnerDetection.dangerLx1 * imageWidth * scaleFactor,
                     bedConnerDetection.dangerLx2 * imageWidth * scaleFactor,
-                    bedConnerDetection.dangerLy1 * imageWidth * scaleFactor,
-                    bedConnerDetection.dangerLy2 * imageWidth * scaleFactor,
+                    bedConnerDetection.dangerLy1 * imageHeight * scaleFactor,
+                    bedConnerDetection.dangerLy2 * imageHeight * scaleFactor,
                     center.y() * imageHeight * scaleFactor)
 
                 rightDangerLim = get_Limit(bedConnerDetection.dangerRx1 * imageWidth * scaleFactor,
                     bedConnerDetection.dangerRx2 * imageWidth * scaleFactor,
-                    bedConnerDetection.dangerRy1 * imageWidth * scaleFactor,
-                    bedConnerDetection.dangerRy2 * imageWidth * scaleFactor,
+                    bedConnerDetection.dangerRy1 * imageHeight * scaleFactor,
+                    bedConnerDetection.dangerRy2 * imageHeight * scaleFactor,
                     center.y() * imageHeight * scaleFactor)
 
                 var centerX: Float = center.x() * imageWidth * scaleFactor

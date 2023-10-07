@@ -52,7 +52,7 @@
         </androidx.appcompat.widget.Toolbar>
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/navigation"
+            android:id="@+id/navigation_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/toolbar"
@@ -64,7 +64,7 @@
             android:id="@+id/view"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_below="@id/navigation"
+            android:layout_below="@id/navigation_view"
             android:background="@android:color/darker_gray" />
 
     </RelativeLayout>
