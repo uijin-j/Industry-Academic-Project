@@ -22,6 +22,9 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -31,9 +34,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation
 import com.google.mediapipe.examples.poselandmarker.R
+import com.google.mediapipe.examples.poselandmarker.databinding.FragmentCameraBinding
+import com.google.mediapipe.examples.poselandmarker.databinding.FragmentPermissionsBinding
 import kotlinx.coroutines.launch
 
 class PermissionsFragment : Fragment() {
+
+    private var _binding: FragmentPermissionsBinding? = null
+    private val binding get() = _binding!!
 
     private val requestCameraPermissionLauncher =
         registerForActivityResult(
@@ -67,6 +75,23 @@ class PermissionsFragment : Fragment() {
         requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentPermissionsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.btnPermission.setOnClickListener {
+            requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
     private fun navigateToCamera() {
         lifecycleScope.launchWhenStarted {
             Navigation.findNavController(
@@ -76,6 +101,11 @@ class PermissionsFragment : Fragment() {
                 R.id.action_permissions_to_camera
             )
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
