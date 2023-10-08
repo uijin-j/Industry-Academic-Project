@@ -19,6 +19,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Camera
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -33,6 +34,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation
+import com.google.mediapipe.examples.poselandmarker.CameraService
 import com.google.mediapipe.examples.poselandmarker.R
 import com.google.mediapipe.examples.poselandmarker.databinding.FragmentCameraBinding
 import com.google.mediapipe.examples.poselandmarker.databinding.FragmentPermissionsBinding
@@ -51,22 +53,20 @@ class PermissionsFragment : Fragment() {
                 if (!Settings.canDrawOverlays(context)) {
                     val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${requireContext().packageName}"))
                     requestOverlayPermissionLauncher.launch(intent)
-                } else {
-                    navigateToCamera()
                 }
             } else {
                 Toast.makeText(context, "Permission request denied", Toast.LENGTH_LONG).show()
             }
+            updateUI()
         }
 
     private val requestOverlayPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        if(Settings.canDrawOverlays(context)) {
-            navigateToCamera()
-        } else {
+        if(!Settings.canDrawOverlays(context)) {
             Toast.makeText(context, "Permission request denied", Toast.LENGTH_LONG).show()
         }
+        updateUI()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,6 +90,39 @@ class PermissionsFragment : Fragment() {
         binding.btnPermission.setOnClickListener {
             requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
+
+        binding.btnPreview.setOnClickListener {
+            navigateToCamera()
+        }
+
+        binding.btnStart.setOnClickListener {
+            val intent = Intent(context, CameraService::class.java)
+            ContextCompat.startForegroundService(requireContext(), intent)
+            CameraService.isRunning = true
+            updateUI()
+        }
+
+        binding.btnStop.setOnClickListener {
+            val intent = Intent(context, CameraService::class.java)
+            activity?.stopService(intent)
+            CameraService.isRunning = false
+            updateUI()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        updateUI()
+    }
+
+    private fun updateUI() {
+        val granted = hasPermissions(requireContext())
+        binding.btnPermission.isEnabled = !granted
+        binding.btnPreview.isEnabled = granted and !CameraService.isRunning
+
+        binding.btnStart.isEnabled = granted and !CameraService.isRunning
+        binding.btnStop.isEnabled = granted and CameraService.isRunning
+
     }
 
     private fun navigateToCamera() {
