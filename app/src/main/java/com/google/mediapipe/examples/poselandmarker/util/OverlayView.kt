@@ -107,7 +107,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         super.draw(canvas)
 
         val scaleX = imageWidth * scaleFactor
-        val scaleY = scaleY
+        val scaleY = imageHeight * scaleFactor
 
 
         results?.let { poseLandmarkerResult ->
