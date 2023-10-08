@@ -39,6 +39,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var bedConnerDetection : BedConnerDetection = BedConnerDetection()
 
     private var results: PoseLandmarkerResult? = null
+
     private var pointPaint = Paint()
     private var greenPaint = Paint()
     private var yellowPaint = Paint()
@@ -104,92 +105,99 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
+
+        val scaleX = imageWidth * scaleFactor
+        val scaleY = scaleY
+
+
         results?.let { poseLandmarkerResult ->
             for(landmark in poseLandmarkerResult.landmarks()) {
+                // 포인트
                 for(normalizedLandmark in landmark) {
                     canvas.drawPoint(
-                        normalizedLandmark.x() * imageWidth * scaleFactor,
-                        normalizedLandmark.y() * imageHeight * scaleFactor,
+                        normalizedLandmark.x() * scaleX,
+                        normalizedLandmark.y() * scaleY,
                         pointPaint
                     )
                 }
-                val canvasWidth = width
-                val canvasHeight = height
 
+                // 라인
                 PoseLandmarker.POSE_LANDMARKS.forEach {
                     canvas.drawLine(
-                        poseLandmarkerResult.landmarks().get(0).get(it!!.start()).x() * imageWidth * scaleFactor,
-                        poseLandmarkerResult.landmarks().get(0).get(it.start()).y() * imageHeight * scaleFactor,
-                        poseLandmarkerResult.landmarks().get(0).get(it.end()).x() * imageWidth * scaleFactor,
-                        poseLandmarkerResult.landmarks().get(0).get(it.end()).y() * imageHeight * scaleFactor,
+                        poseLandmarkerResult.landmarks().get(0).get(it!!.start()).x() * scaleX,
+                        poseLandmarkerResult.landmarks().get(0).get(it.start()).y() * scaleY,
+                        poseLandmarkerResult.landmarks().get(0).get(it.end()).x() * scaleX,
+                        poseLandmarkerResult.landmarks().get(0).get(it.end()).y() * scaleY,
                         linePaint)
-                    val scaleX = canvasWidth / bedConnerDetection.bmpWidth.toDouble()  // desiredWidth is the width of the source you're scaling from, e.g., the bitmap width
-                    val scaleY = scaleX * (bedConnerDetection.bmpHeight.toDouble() / bedConnerDetection.bmpWidth.toDouble())// canvasHeight / bedConnerDetection.bmpHeight.toDouble()
-
-                    canvas.drawLine(
-                        (bedConnerDetection.normalizedLx1 * imageWidth * scaleFactor),
-                        (bedConnerDetection.normalizedLy1 * imageHeight * scaleFactor),
-                        (bedConnerDetection.normalizedLx2 * imageWidth * scaleFactor),
-                        (bedConnerDetection.normalizedLy2 * imageHeight * scaleFactor),
-                        linePaint2)
-
-                    canvas.drawLine(
-                        (bedConnerDetection.normalizedRx1 * imageWidth * scaleFactor),
-                        (bedConnerDetection.normalizedRy1 * imageHeight * scaleFactor),
-                        (bedConnerDetection.normalizedRx2 * imageWidth * scaleFactor),
-                        (bedConnerDetection.normalizedRy2 * imageHeight * scaleFactor),
-                        linePaint2)
-
-                    canvas.drawLine(
-                        (bedConnerDetection.dangerLx1 * imageWidth * scaleFactor),
-                        (bedConnerDetection.dangerLy1 * imageHeight * scaleFactor),
-                        (bedConnerDetection.dangerLx2 * imageWidth * scaleFactor),
-                        (bedConnerDetection.dangerLy2 * imageHeight * scaleFactor),
-                        linePaint2)
-
-                    canvas.drawLine(
-                        (bedConnerDetection.dangerRx1 * imageWidth * scaleFactor),
-                        (bedConnerDetection.dangerRy1 * imageHeight * scaleFactor),
-                        (bedConnerDetection.dangerRx2 * imageWidth * scaleFactor),
-                        (bedConnerDetection.dangerRy2 * imageHeight * scaleFactor),
-                        linePaint2)
-
                 }
 
+                canvas.drawLine(
+                    (bedConnerDetection.normalizedLx1 * scaleX),
+                    (bedConnerDetection.normalizedLy1 * scaleY),
+                    (bedConnerDetection.normalizedLx2 * scaleX),
+                    (bedConnerDetection.normalizedLy2 * scaleY),
+                    linePaint2)
+
+                canvas.drawLine(
+                    (bedConnerDetection.normalizedRx1 * scaleX),
+                    (bedConnerDetection.normalizedRy1 * scaleY),
+                    (bedConnerDetection.normalizedRx2 * scaleX),
+                    (bedConnerDetection.normalizedRy2 * scaleY),
+                    linePaint2)
+
+                canvas.drawLine(
+                    (bedConnerDetection.dangerLx1 * scaleX),
+                    (bedConnerDetection.dangerLy1 * scaleY),
+                    (bedConnerDetection.dangerLx2 * scaleX),
+                    (bedConnerDetection.dangerLy2 * scaleY),
+                    linePaint2)
+
+                canvas.drawLine(
+                    (bedConnerDetection.dangerRx1 * scaleX),
+                    (bedConnerDetection.dangerRy1 * scaleY),
+                    (bedConnerDetection.dangerRx2 * scaleX),
+                    (bedConnerDetection.dangerRy2 * scaleY),
+                    linePaint2)
+
+
+
+                // 중심
                 var center = centerOfGravity.getTotalCOG(landmark)
 
                 leftBedLim = get_Limit(bedConnerDetection.normalizedLx1 * imageWidth * scaleFactor,
                     bedConnerDetection.normalizedLx2 * imageWidth * scaleFactor,
-                    bedConnerDetection.normalizedLy1 * imageHeight * scaleFactor,
-                    bedConnerDetection.normalizedLy2 * imageHeight * scaleFactor,
-                    center.y() * imageHeight * scaleFactor)
+                    bedConnerDetection.normalizedLy1 * scaleY,
+                    bedConnerDetection.normalizedLy2 * scaleY,
+                    center.y() * scaleY)
 
                 rightBedLim = get_Limit(bedConnerDetection.normalizedRx1 * imageWidth * scaleFactor,
                     bedConnerDetection.normalizedRx2 * imageWidth * scaleFactor,
-                    bedConnerDetection.normalizedRy1 * imageHeight * scaleFactor,
-                    bedConnerDetection.normalizedRy2 * imageHeight * scaleFactor,
-                    center.y() * imageHeight * scaleFactor)
+                    bedConnerDetection.normalizedRy1 * scaleY,
+                    bedConnerDetection.normalizedRy2 * scaleY,
+                    center.y() * scaleY)
 
                 leftDangerLim = get_Limit(bedConnerDetection.dangerLx1 * imageWidth * scaleFactor,
                     bedConnerDetection.dangerLx2 * imageWidth * scaleFactor,
-                    bedConnerDetection.dangerLy1 * imageHeight * scaleFactor,
-                    bedConnerDetection.dangerLy2 * imageHeight * scaleFactor,
-                    center.y() * imageHeight * scaleFactor)
+                    bedConnerDetection.dangerLy1 * scaleY,
+                    bedConnerDetection.dangerLy2 * scaleY,
+                    center.y() * scaleY)
 
                 rightDangerLim = get_Limit(bedConnerDetection.dangerRx1 * imageWidth * scaleFactor,
                     bedConnerDetection.dangerRx2 * imageWidth * scaleFactor,
-                    bedConnerDetection.dangerRy1 * imageHeight * scaleFactor,
-                    bedConnerDetection.dangerRy2 * imageHeight * scaleFactor,
-                    center.y() * imageHeight * scaleFactor)
+                    bedConnerDetection.dangerRy1 * scaleY,
+                    bedConnerDetection.dangerRy2 * scaleY,
+                    center.y() * scaleY)
+
+
 
                 var centerX: Float = center.x() * imageWidth * scaleFactor
-                if ((centerX > leftDangerLim)
-                    and (centerX < rightDangerLim)){ // phase 1
+
+                if ((centerX > leftDangerLim) and (centerX < rightDangerLim)){ // phase 1
 
                     logger.info("result : " + "(" + center.x() + ", " + center.y() + ")")
                     canvas.drawPoint(
                         center.x() * imageWidth * scaleFactor,
-                        center.y() * imageHeight * scaleFactor,
+                        center.y() * scaleY,
                         greenPaint
                     )
 
@@ -202,7 +210,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                     logger.info("result : " + "(" + center.x() + ", " + center.y() + ")")
                     canvas.drawPoint(
                         center.x() * imageWidth * scaleFactor,
-                        center.y() * imageHeight * scaleFactor,
+                        center.y() * scaleY,
                         redPaint
                     )
 
@@ -213,7 +221,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                     logger.info("result : " + "(" + center.x() + ", " + center.y() + ")")
                     canvas.drawPoint(
                         center.x() * imageWidth * scaleFactor,
-                        center.y() * imageHeight * scaleFactor,
+                        center.y() * scaleY,
                         blackPaint
                     )
 

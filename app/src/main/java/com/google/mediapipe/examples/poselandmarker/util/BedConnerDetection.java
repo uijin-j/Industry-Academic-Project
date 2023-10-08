@@ -201,31 +201,31 @@ public class BedConnerDetection {
                 }
                 //Imgproc.line(frame, start, end, new Scalar(0, 0, 255), 4);
             }
-
-            // 이미지의 크기로 좌표를 정규화
-            normalizedLx1 = (float) (lx1 / bmpWidth);
-            normalizedLy1 = (float) (ly1 / bmpHeight);
-            normalizedLx2 = (float) (lx2 / bmpWidth);
-            normalizedLy2 = (float) (ly2 / bmpHeight);
-
-            normalizedRx1 = (float) (rx1 / bmpWidth);
-            normalizedRy1 = (float) (ry1 / bmpHeight);
-            normalizedRx2 = (float) (rx2 / bmpWidth);
-            normalizedRy2 = (float) (ry2 / bmpHeight);
-
-
-            // 위험 영역
-            dangerLx1 = normalizedLx1+(normalizedRx1 - normalizedLx1)*(RATE_OF_DANGER/2);
-            dangerLx2 = normalizedLx2+(normalizedRx2 - normalizedLx2)*(RATE_OF_DANGER/2);
-            dangerLy1 = normalizedLy1;
-            dangerLy2 = normalizedLy2;
-
-            dangerRx1 = normalizedRx1-(normalizedRx1 - normalizedLx1)*(RATE_OF_DANGER/2);
-            dangerRx2 = normalizedRx2-(normalizedRx2 - normalizedLx2)*(RATE_OF_DANGER/2);
-            dangerRy1 = normalizedRy1;
-            dangerRy2 = normalizedRy2;
-
         }
+
+        // 이미지의 크기로 좌표를 정규화
+        normalizedLx1 = (float) (lx1 / bmpWidth);
+        normalizedLy1 = (float) (ly1 / bmpHeight);
+        normalizedLx2 = (float) (lx2 / bmpWidth);
+        normalizedLy2 = (float) (ly2 / bmpHeight);
+
+        normalizedRx1 = (float) (rx1 / bmpWidth);
+        normalizedRy1 = (float) (ry1 / bmpHeight);
+        normalizedRx2 = (float) (rx2 / bmpWidth);
+        normalizedRy2 = (float) (ry2 / bmpHeight);
+
+
+        // 위험 영역
+        dangerLx1 = normalizedLx1+(normalizedRx1 - normalizedLx1)*(RATE_OF_DANGER/2);
+        dangerLx2 = normalizedLx2+(normalizedRx2 - normalizedLx2)*(RATE_OF_DANGER/2);
+        dangerLy1 = normalizedLy1;
+        dangerLy2 = normalizedLy2;
+
+        dangerRx1 = normalizedRx1-(normalizedRx1 - normalizedLx1)*(RATE_OF_DANGER/2);
+        dangerRx2 = normalizedRx2-(normalizedRx2 - normalizedLx2)*(RATE_OF_DANGER/2);
+        dangerRy1 = normalizedRy1;
+        dangerRy2 = normalizedRy2;
+
         Utils.matToBitmap(frame, bitmap);
         return bitmap;
     }

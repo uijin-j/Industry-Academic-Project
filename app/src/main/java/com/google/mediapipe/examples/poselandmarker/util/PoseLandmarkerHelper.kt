@@ -18,8 +18,6 @@ package com.google.mediapipe.examples.poselandmarker.util
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -41,19 +39,12 @@ class PoseLandmarkerHelper(
     var currentDelegate: Int = DELEGATE_CPU,
     var runningMode: RunningMode = RunningMode.IMAGE,
     val context: Context,
-    // this listener is only used when running in RunningMode.LIVE_STREAM
-    // 라이브 스트림 리스너
     val poseLandmarkerHelperListener: LandmarkerListener? = null,
 
     var bedConnerDetection : BedConnerDetection = BedConnerDetection()
 ) {
 
-    // For this example this needs to be a var so it can be reset on changes.
-    // If the Pose Landmarker will not change, a lazy val would be preferable.
-    // 이 예에서는 변경 시 재설정할 수 있도록 var여야 합니다
-    // Pose Landmarker가 변경되지 않는 경우 Lazy val이 바람직합니다.
     private var poseLandmarker: PoseLandmarker? = null
-
 
     init {
         setupPoseLandmarker()
@@ -208,11 +199,7 @@ class PoseLandmarkerHelper(
             matrix, true
         )
 
-        // XXX:
         val processedBitmap = bedConnerDetection.detectBedBorders(rotatedBitmap)
-        //var mpImage = BitmapImageBuilder(processedBitmap).build()
-
-        // Convert the input Bitmap object to an MPImage object to run inference
         var mpImage = BitmapImageBuilder(processedBitmap).build()
 
         detectAsync(mpImage, frameTime)
@@ -234,6 +221,8 @@ class PoseLandmarkerHelper(
     // 사용자 갤러리에서 로드된 비디오 파일의 URI를 수락하고 비디오에서 포즈 랜드마크 유추를
     // 실행하려고 시도합니다. 이 프로세스는 비디오의 모든 프레임을 평가하고 반환될 번들에
     // 결과를 첨부합니다.
+
+    /*
     fun detectVideoFile(
         videoUri: Uri,
         inferenceIntervalMs: Long
@@ -327,9 +316,14 @@ class PoseLandmarkerHelper(
             ResultBundle(resultList, inferenceTimePerFrameMs, height, width)
         }
     }
+    */
 
+    /*
     // Accepted a Bitmap and runs pose landmarker inference on it to return
     // results back to the caller
+    */
+
+    /*
     fun detectImage(image: Bitmap): ResultBundle? {
         if (runningMode != RunningMode.IMAGE) {
             throw IllegalArgumentException(
@@ -364,12 +358,8 @@ class PoseLandmarkerHelper(
         )
         return null
     }
+    */
 
-    /**
-     * 라이브 스트림
-     */
-    // Return the landmark result to this PoseLandmarkerHelper's caller
-    // PoseLandmarkerHelper을 호출한 곳에 landmark result 반환
     private fun returnLivestreamResult(
         result: PoseLandmarkerResult,
         input: MPImage
