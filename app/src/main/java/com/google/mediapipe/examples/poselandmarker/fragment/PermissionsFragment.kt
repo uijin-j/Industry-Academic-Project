@@ -17,55 +17,54 @@ package com.google.mediapipe.examples.poselandmarker.fragment
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.Navigation
 import com.google.mediapipe.examples.poselandmarker.R
-
-private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
+import kotlinx.coroutines.launch
 
 class PermissionsFragment : Fragment() {
 
-    private val requestPermissionLauncher =
+    private val requestCameraPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                Toast.makeText(
-                    context,
-                    "Permission request granted",
-                    Toast.LENGTH_LONG
-                ).show()
-                navigateToCamera()
+                if (!Settings.canDrawOverlays(context)) {
+                    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${requireContext().packageName}"))
+                    requestOverlayPermissionLauncher.launch(intent)
+                } else {
+                    navigateToCamera()
+                }
             } else {
-                Toast.makeText(
-                    context,
-                    "Permission request denied",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(context, "Permission request denied", Toast.LENGTH_LONG).show()
             }
         }
 
+    private val requestOverlayPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if(Settings.canDrawOverlays(context)) {
+            navigateToCamera()
+        } else {
+            Toast.makeText(context, "Permission request denied", Toast.LENGTH_LONG).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.CAMERA
-            ) -> {
-                navigateToCamera()
-            }
-            else -> {
-                requestPermissionLauncher.launch(
-                    Manifest.permission.CAMERA
-                )
-            }
-        }
+
+        requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
     private fun navigateToCamera() {
@@ -80,13 +79,10 @@ class PermissionsFragment : Fragment() {
     }
 
     companion object {
-
-        /** Convenience method used to check if all permissions required by this app are granted */
-        fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
-            ContextCompat.checkSelfPermission(
-                context,
-                it
-            ) == PackageManager.PERMISSION_GRANTED
+        fun hasPermissions(context: Context): Boolean {
+            return hasCameraPermission(context) and Settings.canDrawOverlays(context)
         }
+
+        private fun hasCameraPermission(context: Context) = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
     }
 }
