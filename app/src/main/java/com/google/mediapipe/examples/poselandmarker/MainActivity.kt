@@ -25,22 +25,10 @@ import com.google.mediapipe.examples.poselandmarker.databinding.ActivityMainBind
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val viewModel : MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
-        val navController = navHostFragment.navController
-        binding.navigationView.setupWithNavController(navController)
-        binding.navigationView.setOnNavigationItemReselectedListener {
-            // ignore the reselection
-        }
-    }
-
-    override fun onBackPressed() {
-        finish()
     }
 }

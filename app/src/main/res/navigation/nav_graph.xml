@@ -26,9 +26,7 @@
 
         <action
             android:id="@+id/action_permissions_to_camera"
-            app:destination="@id/camera_fragment"
-            app:popUpTo="@id/permissions_fragment"
-            app:popUpToInclusive="true" />
+            app:destination="@id/camera_fragment" />
 
     </fragment>
 
@@ -39,8 +37,6 @@
 
         <action
             android:id="@+id/action_camera_to_permissions"
-            app:destination="@id/permissions_fragment"
-            app:popUpTo="@id/camera_fragment"
-            app:popUpToInclusive="true" />
+            app:destination="@id/permissions_fragment" />
     </fragment>
 </navigation>
