@@ -39,6 +39,7 @@ import com.google.mediapipe.examples.poselandmarker.R
 import com.google.mediapipe.examples.poselandmarker.databinding.FragmentCameraBinding
 import com.google.mediapipe.examples.poselandmarker.databinding.FragmentPermissionsBinding
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class PermissionsFragment : Fragment() {
 
@@ -107,6 +108,13 @@ class PermissionsFragment : Fragment() {
             activity?.stopService(intent)
             CameraService.isRunning = false
             updateUI()
+        }
+
+        binding.btnBroadcast.setOnClickListener {
+            val intent = Intent("com.stlinkproject.action.DANGER_ALERT").apply {
+                putExtra("key_type", Random.nextInt(4))
+            }
+            context?.sendBroadcast(intent)
         }
     }
 
