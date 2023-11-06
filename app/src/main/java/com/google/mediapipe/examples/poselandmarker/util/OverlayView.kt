@@ -16,6 +16,7 @@
 package com.google.mediapipe.examples.poselandmarker.util
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -30,6 +31,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.random.Random
 
 class OverlayView(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
@@ -194,11 +196,17 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 leftDangerLim = get_Limit(dl1x, dl2x, dl1y, dl2y, center.y())
                 rightDangerLim = get_Limit(dr1x, dr2x, dr1y, dr2y, center.y())
 
-                if((leftDangerLim < center.x()) and (rightDangerLim > center.x())){
+                if(center.x() > leftDangerLim && center.x() < rightDangerLim){
                     paintCenter = greenPaint
-                }
-                if((leftBedLim > center.x()) or (rightBedLim < center.x())){
+                } else if(center.x() < leftBedLim || center.x() > rightBedLim) {
                     paintCenter = blackPaint
+                    context?.sendBroadcast(Intent("com.stlinkproject.action.DANGER_ALERT").apply {
+                        putExtra("key_type", 4)
+                    })
+                } else {
+                    context?.sendBroadcast(Intent("com.stlinkproject.action.DANGER_ALERT").apply {
+                        putExtra("key_type", 2)
+                    })
                 }
 
                 logger.info("result : " + "(" + center.x() + ", " + center.y() + ")")
