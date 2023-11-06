@@ -16,3 +16,4 @@ rootProject.name = "Pose Landmarker"
 include ':app'
 include ':mediapipe:mediapipe'
 include ':openCV'
+include ':samplereceiver'
