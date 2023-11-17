@@ -21,12 +21,14 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.google.mediapipe.examples.poselandmarker.R
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
+import kotlinx.coroutines.Delay
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlin.math.max
@@ -35,6 +37,7 @@ import kotlin.random.Random
 
 class OverlayView(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
+
     private var logger: Logger = LoggerFactory.getLogger(OverlayView::class.java)
     private var centerOfGravity : CenterOfGravity = CenterOfGravity()
 
@@ -59,6 +62,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var leftDangerLim: Float = 0f
     private var rightDangerLim: Float = 0f
 
+    private var prevTime = System.currentTimeMillis()
 
     init {
         initPaints()
@@ -196,18 +200,27 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 leftDangerLim = get_Limit(dl1x, dl2x, dl1y, dl2y, center.y())
                 rightDangerLim = get_Limit(dr1x, dr2x, dr1y, dr2y, center.y())
 
+
+                var alertType = -1
                 if(center.x() > leftDangerLim && center.x() < rightDangerLim){
                     paintCenter = greenPaint
                 } else if(center.x() < leftBedLim || center.x() > rightBedLim) {
                     paintCenter = blackPaint
-                    context?.sendBroadcast(Intent("com.stlinkproject.action.DANGER_ALERT").apply {
-                        putExtra("key_type", 4)
-                    })
+                    alertType = 4
                 } else {
-                    context?.sendBroadcast(Intent("com.stlinkproject.action.DANGER_ALERT").apply {
-                        putExtra("key_type", 2)
-                    })
+                    alertType = 2
                 }
+
+                runDelay({
+                    // 여기서 작업하시면 되요
+                    Log.d(".Delay", "draw: $prevTime")
+                    if(alertType != -1) {
+                        context?.sendBroadcast(Intent("com.stlinkproject.action.DANGER_ALERT").apply {
+                            putExtra("key_type", alertType)
+                        })
+                    }
+                }, 3000)
+
 
                 logger.info("result : " + "(" + center.x() + ", " + center.y() + ")")
                 canvas.drawPoint(
@@ -218,6 +231,13 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
             }
 
+        }
+    }
+
+    private fun runDelay(block: () -> Unit, delay: Int) {
+        if(System.currentTimeMillis() - prevTime >= delay) {
+            prevTime = System.currentTimeMillis()
+            block()
         }
     }
 
