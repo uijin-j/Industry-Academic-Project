@@ -31,9 +31,12 @@ import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 import kotlinx.coroutines.Delay
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 import kotlin.random.Random
+import android.widget.Toast;
 
 class OverlayView(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
@@ -62,6 +65,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     private var leftDangerLim: Float = 0f
     private var rightDangerLim: Float = 0f
 
+    private var prevPoint: Pair<Float, Float> = Pair(-1f, -1f)
     private var prevTime = System.currentTimeMillis()
 
     init {
@@ -214,7 +218,56 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 runDelay({
                     // 여기서 작업하시면 되요
                     Log.d(".Delay", "draw: $prevTime")
-                    if(alertType != -1) {
+
+                    if(alertType != 2) { // 위험 영역이 아니라면 배열 초기화
+                        if (prevPoint.first != -1f){
+                            prevPoint = Pair(-1f, -1f)
+                        }
+                    }
+
+                    if(alertType == 2) { // 이 영역 내부에서 속도 변화 감지
+
+                        if(prevPoint.first != -1f) {
+                            var limitRate: Float = 0.3f
+
+
+                            if (center.x() < leftDangerLim) {
+                                var limitDist: Float =
+                                    limitRate * getPointDistance(l1x, l2x, l1y, l2y, dl1x, dl1y)
+
+                                var centerDist: Float =
+                                    getPointDistance(l1x, l2x, l1y, l2y, center.x(), center.y())
+
+                                var prevDist: Float =
+                                    getPointDistance(l1x, l2x, l1y, l2y, prevPoint.first, prevPoint.second)
+
+                                if(prevDist-centerDist < limitDist){
+                                    // 왼쪽 영역 3단계
+                                    Toast.makeText(context,	"left", Toast.LENGTH_SHORT).show()
+
+                                }
+
+
+
+                            } else {
+                                var limitDist: Float =
+                                    limitRate * getPointDistance(r1x, r2x, r1y, r2y, dr1x, dr1y)
+
+                                var centerDist: Float =
+                                    getPointDistance(r1x, r2x, r1y, r2y,  center.x(), center.y())
+
+                                var prevDist: Float =
+                                    getPointDistance(r1x, r2x, r1y, r2y, prevPoint.first, prevPoint.second)
+
+                                if(centerDist-prevDist > limitDist){
+                                    //오른쪽 영역
+                                    Toast.makeText(context,	"right", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                        prevPoint = Pair(center.x(), center.y())
+                    }
+                    else if(alertType == 4) { // 이미 떨어짐
                         context?.sendBroadcast(Intent("com.stlinkproject.action.DANGER_ALERT").apply {
                             putExtra("key_type", alertType)
                         })
@@ -232,6 +285,16 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
             }
 
         }
+    }
+    private fun getPointDistance(x1: Float, x2: Float, y1: Float, y2: Float, danger_x: Float, danger_y: Float): Float {
+        var coef: Float = (y2-y1)/(x2-x1)
+        var bias: Float = y1-(x1 * coef)
+
+        var numerator: Float = abs((coef*danger_x)-(danger_y)+bias)
+        var denominator: Float = sqrt(1f + (coef*coef))
+        var result: Float = numerator / denominator
+
+        return result
     }
 
     private fun runDelay(block: () -> Unit, delay: Int) {
