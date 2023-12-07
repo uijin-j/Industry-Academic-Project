@@ -2,8 +2,11 @@ package com.google.mediapipe.examples.poselandmarker
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.os.Build
@@ -13,6 +16,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
@@ -60,14 +64,26 @@ class CameraService : LifecycleService(), PoseLandmarkerHelper.LandmarkerListene
 
     private val job = SupervisorJob()
 
-    override fun onCreate() {
-        super.onCreate()
-        isRunning = true
+    private var previewEnabled = false
+    private val receiver = object: BroadcastReceiver(){
+        override fun onReceive(context: Context, intent: Intent) {
+            val preview = intent.getBooleanExtra("preview", false)
+            if(preview) {
+                previewEnabled = !previewEnabled
+                Toast.makeText(context, "미리보기 ${if(previewEnabled) "켜짐" else "꺼짐"}", Toast.LENGTH_SHORT).show()
+                if(previewEnabled) {
+                    windowManager.updateViewLayout(mView, getPreviewParams(WindowManager.LayoutParams.MATCH_PARENT, 1000))
+                } else {
+                    windowManager.updateViewLayout(mView, getPreviewParams(1, 1))
+                }
+            }
+        }
+    }
 
-        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+    private fun getPreviewParams(width: Int, height: Int): WindowManager.LayoutParams {
         val layoutParams = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            1000,
+            width,
+            height,
             0,
             0,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
@@ -76,13 +92,30 @@ class CameraService : LifecycleService(), PoseLandmarkerHelper.LandmarkerListene
         ).apply {
             gravity = Gravity.LEFT or Gravity.TOP
         }
+        return layoutParams
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        isRunning = true
+        val filter = IntentFilter().apply {
+            addAction("com.stlinkproject.action.APP")
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(receiver, filter, RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(receiver, filter)
+        }
+
+        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
         val mInflater = getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         mView = mInflater.inflate(R.layout.layout_service, null)
 
         viewFinder = mView.findViewById(R.id.viewFinder)
         overlay = mView.findViewById(R.id.overlay)
-        windowManager.addView(mView, layoutParams)
+        windowManager.addView(mView, getPreviewParams(1, 1))
         onViewCreated()
     }
 
@@ -179,9 +212,24 @@ class CameraService : LifecycleService(), PoseLandmarkerHelper.LandmarkerListene
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         createNotificationChannel()
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+        val actionIntent = Intent("com.stlinkproject.action.APP").apply {
+            putExtra("preview", true)
+        }
+
+        val actionPendingIntent = PendingIntent.getBroadcast(this, 0, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher_round)
             .setContentTitle(CHANNEL_NAME)
+            .setContentIntent(pendingIntent)
+            .addAction(R.drawable.ic_plus, "미리보기", actionPendingIntent)
             .build()
 
         startForeground(1, notification)
@@ -238,6 +286,7 @@ class CameraService : LifecycleService(), PoseLandmarkerHelper.LandmarkerListene
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
+        unregisterReceiver(receiver)
         job.cancel()
         windowManager.removeView(mView)
         backgroundExecutor.shutdown()

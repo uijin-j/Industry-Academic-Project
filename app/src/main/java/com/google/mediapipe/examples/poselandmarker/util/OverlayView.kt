@@ -38,10 +38,7 @@ import kotlin.math.sqrt
 import kotlin.random.Random
 import android.widget.Toast;
 
-class OverlayView(context: Context?, attrs: AttributeSet?) :
-    View(context, attrs) {
-
-    private var logger: Logger = LoggerFactory.getLogger(OverlayView::class.java)
+class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
     private var centerOfGravity : CenterOfGravity = CenterOfGravity()
 
     private var bedConnerDetection : BedConnerDetection = BedConnerDetection()
@@ -161,131 +158,80 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 var dr2x: Float = bedConnerDetection.dangerRx2
                 var dr2y: Float = bedConnerDetection.dangerRy2
 
-
-                canvas.drawLine(
-                    (dl1x * scaleX),
-                    (dl1y * scaleY),
-                    (dl2x * scaleX),
-                    (dl2y * scaleY),
-                    linePaint)
-
-                canvas.drawLine(
-                    (dr1x * scaleX),
-                    (dr1y * scaleY),
-                    (dr2x * scaleX),
-                    (dr2y * scaleY),
-                    linePaint)
-
-                canvas.drawLine(
-                    (l1x * scaleX),
-                    (l1y * scaleY),
-                    (l2x * scaleX),
-                    (l2y * scaleY),
-                    linePaint2)
-
-                canvas.drawLine(
-                    (r1x * scaleX),
-                    (r1y * scaleY),
-                    (r2x * scaleX),
-                    (r2y * scaleY),
-                    linePaint2)
-
+                // 직선
+                canvas.drawLine(dl1x * scaleX, dl1y * scaleY, dl2x * scaleX, dl2y * scaleY, linePaint)
+                canvas.drawLine(dr1x * scaleX, dr1y * scaleY, dr2x * scaleX, dr2y * scaleY, linePaint)
+                canvas.drawLine(l1x * scaleX, l1y * scaleY, l2x * scaleX, l2y * scaleY, linePaint2)
+                canvas.drawLine(r1x * scaleX, r1y * scaleY, r2x * scaleX, r2y * scaleY, linePaint2)
 
                 // 중심
                 var center = centerOfGravity.getTotalCOG(landmark)
                 var drawCenterX: Float = center.x() * scaleX
                 var drawCenterY: Float = center.y() * scaleY
 
-
-                var paintCenter: Paint = yellowPaint
-
+                // 판별 및 색상 결정
                 leftBedLim = get_Limit(l1x, l2x, l1y, l2y, center.y())
                 rightBedLim = get_Limit(r1x, r2x, r1y, r2y, center.y())
                 leftDangerLim = get_Limit(dl1x, dl2x, dl1y, dl2y, center.y())
                 rightDangerLim = get_Limit(dr1x, dr2x, dr1y, dr2y, center.y())
 
+                var alertType =
+                    if(center.x() > leftDangerLim && center.x() < rightDangerLim) 1
+                    else if(center.x() < leftBedLim || center.x() > rightBedLim)  4
+                    else 2
 
-                var alertType = -1
-                if(center.x() > leftDangerLim && center.x() < rightDangerLim){
-                    paintCenter = greenPaint
-                } else if(center.x() < leftBedLim || center.x() > rightBedLim) {
-                    paintCenter = blackPaint
-                    alertType = 4
-                } else {
-                    alertType = 2
-                }
 
                 runDelay({
-                    // 여기서 작업하시면 되요
-                    Log.d(".Delay", "draw: $prevTime")
-
                     if(alertType != 2) { // 위험 영역이 아니라면 배열 초기화
-                        if (prevPoint.first != -1f){
-                            prevPoint = Pair(-1f, -1f)
-                        }
-                    }
-
-                    if(alertType == 2) { // 이 영역 내부에서 속도 변화 감지
-
+                        prevPoint = Pair(-1f, -1f)
+                    } else {
+                        val limitRate = 0.3f
+                        // 이 영역 내부에서 속도 변화 감지
                         if(prevPoint.first != -1f) {
-                            var limitRate: Float = 0.3f
+                            if (center.x() <= leftDangerLim) { // 왼쪽
+                                val limitDist: Float = limitRate * getPointDistance(l1x, l2x, l1y, l2y, dl1x, dl1y)
+                                val centerDist: Float = getPointDistance(l1x, l2x, l1y, l2y, center.x(), center.y())
+                                val prevDist: Float = getPointDistance(l1x, l2x, l1y, l2y, prevPoint.first, prevPoint.second)
 
-
-                            if (center.x() < leftDangerLim) {
-                                var limitDist: Float =
-                                    limitRate * getPointDistance(l1x, l2x, l1y, l2y, dl1x, dl1y)
-
-                                var centerDist: Float =
-                                    getPointDistance(l1x, l2x, l1y, l2y, center.x(), center.y())
-
-                                var prevDist: Float =
-                                    getPointDistance(l1x, l2x, l1y, l2y, prevPoint.first, prevPoint.second)
-
-                                if(prevDist-centerDist < limitDist){
-                                    // 왼쪽 영역 3단계
-                                    Toast.makeText(context,	"left", Toast.LENGTH_SHORT).show()
-
+                                if(prevDist - centerDist < limitDist){
+                                    alertType = 3
                                 }
-
-
-
-                            } else {
-                                var limitDist: Float =
-                                    limitRate * getPointDistance(r1x, r2x, r1y, r2y, dr1x, dr1y)
-
-                                var centerDist: Float =
-                                    getPointDistance(r1x, r2x, r1y, r2y,  center.x(), center.y())
-
-                                var prevDist: Float =
-                                    getPointDistance(r1x, r2x, r1y, r2y, prevPoint.first, prevPoint.second)
-
-                                if(centerDist-prevDist > limitDist){
-                                    //오른쪽 영역
-                                    Toast.makeText(context,	"right", Toast.LENGTH_SHORT).show()
+                            } else { // 오른쪽
+                                val limitDist: Float = limitRate * getPointDistance(r1x, r2x, r1y, r2y, dr1x, dr1y)
+                                val centerDist: Float = getPointDistance(r1x, r2x, r1y, r2y,  center.x(), center.y())
+                                val prevDist: Float = getPointDistance(r1x, r2x, r1y, r2y, prevPoint.first, prevPoint.second)
+                                if(centerDist - prevDist > limitDist){
+                                    alertType = 3
                                 }
                             }
                         }
                         prevPoint = Pair(center.x(), center.y())
                     }
-                    else if(alertType == 4) { // 이미 떨어짐
-                        context?.sendBroadcast(Intent("com.stlinkproject.action.DANGER_ALERT").apply {
-                            putExtra("key_type", alertType)
-                        })
-                    }
+
+                    context?.sendBroadcast(Intent("com.stlinkproject.action.DANGER_ALERT").apply {
+                        putExtra("key_type", alertType)
+                    })
                 }, 3000)
 
+                // 1: 그린, 2: 옐로우, 3: 레드, 4: 블랙
 
-                logger.info("result : " + "(" + center.x() + ", " + center.y() + ")")
-                canvas.drawPoint(
-                    drawCenterX,
-                    drawCenterY,
-                    paintCenter
-                )
 
+                val paintCenter = when(alertType) {
+                    2 ->  yellowPaint
+                    3 ->  redPaint
+                    4 ->  blackPaint
+                    else -> greenPaint
+                }
+
+
+                // 중심 그리기
+                canvas.drawCircle(drawCenterX, drawCenterY, 100.0f, paintCenter)
+                canvas.drawPoint(drawCenterX, drawCenterY, paintCenter)
             }
 
         }
     }
+
     private fun getPointDistance(x1: Float, x2: Float, y1: Float, y2: Float, danger_x: Float, danger_y: Float): Float {
         var coef: Float = (y2-y1)/(x2-x1)
         var bias: Float = y1-(x1 * coef)
