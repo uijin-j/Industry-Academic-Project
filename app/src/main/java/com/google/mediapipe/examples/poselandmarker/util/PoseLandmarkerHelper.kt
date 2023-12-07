@@ -20,6 +20,7 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.SystemClock
 import android.util.Log
+import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import androidx.camera.core.ImageProxy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
@@ -193,11 +194,11 @@ class PoseLandmarkerHelper(
             }
         }
 
-
-        val rotatedBitmap = Bitmap.createBitmap(
+        var rotatedBitmap = Bitmap.createBitmap(
             bitmapBuffer, 0, 0, bitmapBuffer.width, bitmapBuffer.height,
             matrix, true
         )
+
 
         val processedBitmap = bedConnerDetection.detectBedBorders(rotatedBitmap)
         var mpImage = BitmapImageBuilder(processedBitmap).build()

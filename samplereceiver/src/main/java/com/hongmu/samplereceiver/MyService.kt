@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.os.Build
 import android.os.IBinder
 import android.widget.Toast
@@ -30,6 +32,10 @@ class MyService : Service() {
     private val receiver = object: BroadcastReceiver(){
         override fun onReceive(context: Context, intent: Intent) {
             val type = intent.getIntExtra("key_type", -1)
+            if(type == 4) {
+                ToneGenerator(AudioManager.STREAM_MUSIC, 100)
+                    .startTone(ToneGenerator.TONE_CDMA_ABBR_ALERT, 300)
+            }
             logDatabase.logDao().insert(MyLog(0, type, System.currentTimeMillis()))
         }
     }

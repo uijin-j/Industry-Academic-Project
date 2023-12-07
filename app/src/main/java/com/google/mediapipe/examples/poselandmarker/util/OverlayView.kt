@@ -225,6 +225,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
 
 
                 // 중심 그리기
+                canvas.drawCircle(drawCenterX, drawCenterY, 100.0f, paintCenter)
                 canvas.drawPoint(drawCenterX, drawCenterY, paintCenter)
             }
 
